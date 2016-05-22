@@ -30,8 +30,6 @@ public:
 
     GraphLogic *graphLogic() const;
 
-    static const QColor m_paperColor;
-
 public slots:
     void zoomIn();
     void zoomOut();

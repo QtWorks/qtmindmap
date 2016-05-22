@@ -1,5 +1,6 @@
 #include "include/node.h"
 
+#include <QApplication>
 #include <QPainter>
 #include <QStyleOption>
 #include <QDebug>
@@ -13,21 +14,21 @@ const double Node::m_pi = 3.14159265358979323846264338327950288419717;
 const double Node::m_oneAndHalfPi = Node::m_pi * 1.5;
 const double Node::m_twoPi = Node::m_pi * 2.0;
 
-const QColor Node::m_gold(255,215,0);
+const QColor Node::m_blue(50, 141, 255);
 
 Node::Node(GraphLogic *graphLogic)
     : m_graphLogic(graphLogic)
     , m_number(-1)
     , m_hasBorder(false)
     , m_numberIsSpecial(false)
-    , m_color(m_gold)
-    , m_textColor(0,0,0)
+    , m_color(m_blue)
+    , m_textColor(QApplication::palette().text().color())
     , m_effect(new QGraphicsDropShadowEffect(this))
 {
     setFlag(ItemIsMovable);
     setFlag(ItemSendsGeometryChanges);
     setCacheMode(DeviceCoordinateCache);
-    setDefaultTextColor(QColor(0,0,0));
+    setDefaultTextColor(QApplication::palette().text().color());
     setZValue(2);
     setGraphicsEffect(m_effect);
     m_effect->setEnabled(false);
@@ -408,7 +409,7 @@ void Node::paint(QPainter *painter,
             //
             // Рисуем рамку областью, т.к. родная рисуется коряво
             //
-            painter->setBrush(Qt::black);
+            painter->setBrush(QApplication::palette().text());
             QRectF borderRect = boundingRect();
             painter->drawRoundedRect(borderRect, 6.0, 6.0);
 

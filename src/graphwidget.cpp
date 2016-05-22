@@ -1,5 +1,6 @@
 #include "include/graphwidget.h"
 
+#include <QApplication>
 #include <QDebug>
 #include <QPinchGesture>
 
@@ -8,8 +9,6 @@
 #include "include/mainwindow.h"
 
 #include <math.h>
-
-const QColor GraphWidget::m_paperColor(255,255,153);
 
 GraphWidget::GraphWidget(MainWindow *parent) :
     QGraphicsView(parent),
@@ -209,7 +208,7 @@ void GraphWidget::drawBackground(QPainter *painter, const QRectF &rect)
 {
     Q_UNUSED(rect);
 
-    painter->fillRect(m_scene->sceneRect(), GraphWidget::m_paperColor);
+    painter->fillRect(m_scene->sceneRect(), QApplication::palette().base());
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(m_scene->sceneRect());
 }

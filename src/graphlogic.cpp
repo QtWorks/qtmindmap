@@ -284,10 +284,10 @@ void GraphLogic::writeContentToPngFile(const QString &fileName)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Strange that I have to set this, and scene->render() does not do this
-    m_graphWidget->scene()->setBackgroundBrush(GraphWidget::m_paperColor);
+    m_graphWidget->scene()->setBackgroundBrush(QApplication::palette().base());
 
     m_graphWidget->scene()->render(&painter);
-    painter.setBackground(GraphWidget::m_paperColor);
+    painter.setBackground(QApplication::palette().base());
     painter.end();
 
     img.save(fileName);

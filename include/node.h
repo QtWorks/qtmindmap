@@ -110,7 +110,7 @@ private:
     static const double m_oneAndHalfPi;
     static const double m_twoPi;
 
-    static const QColor m_gold;
+    static const QColor m_blue;
 };
 
 #endif // NODE_H
