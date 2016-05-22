@@ -398,16 +398,34 @@ void Node::paint(QPainter *painter,
     {
         painter->setPen(Qt::transparent);
         painter->setBrush(m_numberIsSpecial ? Qt::green : Qt::yellow);
-        painter->drawRoundedRect(boundingRect(), 20.0, 15.0);
+        painter->drawRoundedRect(boundingRect(), 6.0, 6.0);
     }
     else
     {
-        m_hasBorder ?
-            painter->setPen(QPen(QBrush(Qt::black), 1)) : // border is scaled
-            painter->setPen(Qt::transparent);
+        painter->setPen(Qt::transparent);
 
-        painter->setBrush(m_color);
-        painter->drawRoundedRect(boundingRect(), 20.0, 15.0);
+        if (m_hasBorder) {
+            //
+            // Рисуем рамку областью, т.к. родная рисуется коряво
+            //
+            painter->setBrush(Qt::black);
+            QRectF borderRect = boundingRect();
+            painter->drawRoundedRect(borderRect, 6.0, 6.0);
+
+            //
+            // Сужаем область отрисовки фона
+            //
+            painter->setBrush(m_color);
+            QRectF bodyRect = boundingRect();
+            bodyRect.moveTop(bodyRect.top() + 1);
+            bodyRect.moveLeft(bodyRect.left() + 1);
+            bodyRect.setWidth(bodyRect.width() - 2);
+            bodyRect.setHeight(bodyRect.height() - 2);
+            painter->drawRoundedRect(bodyRect, 6.0, 6.0);
+        } else {
+            painter->setBrush(m_color);
+            painter->drawRoundedRect(boundingRect(), 6.0, 6.0);
+        }
 
     }
     painter->setBrush(Qt::NoBrush);

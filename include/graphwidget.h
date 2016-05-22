@@ -10,6 +10,7 @@
 
 class MainWindow;
 class GraphLogic;
+class QGestureEvent;
 
 /** Responsibilities:
   * - Handle scene zoom in/out events
@@ -32,7 +33,6 @@ public:
     static const QColor m_paperColor;
 
 public slots:
-
     void zoomIn();
     void zoomOut();
 
@@ -41,19 +41,32 @@ signals:
     void  notification(const QString &msg);
 
 protected:
+    /**
+     * @brief Переопределяем для обработки жестов
+     */
+    bool event(QEvent* _event);
 
-    void keyPressEvent(QKeyEvent *event);
-    void wheelEvent(QWheelEvent *event);
+    /**
+     * @brief Обрабатываем жест увеличения масштаба
+     */
+    void gestureEvent(QGestureEvent* _event);
+
+    void keyPressEvent(QKeyEvent* _event);
+    void wheelEvent(QWheelEvent* _event);
     void drawBackground(QPainter *painter, const QRectF &rect);
 
 private:
-
     void scaleView(qreal factor);
 
-
+private:
     MainWindow *m_parent;
     QGraphicsScene *m_scene;
     GraphLogic *m_graphlogic;
+
+    /**
+     * @brief Инерционный тормоз масштабирования при помощи жестов
+     */
+    int m_gestureZoomInertionBreak;
 };
 
 #endif // GRAPHWIDGET_H

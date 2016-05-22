@@ -1,6 +1,7 @@
 #include "include/graphwidget.h"
 
 #include <QDebug>
+#include <QPinchGesture>
 
 #include "include/node.h"
 #include "include/edge.h"
@@ -10,15 +11,28 @@
 
 const QColor GraphWidget::m_paperColor(255,255,153);
 
-GraphWidget::GraphWidget(MainWindow *parent)
-    : QGraphicsView(parent)
-    , m_parent(parent)
+GraphWidget::GraphWidget(MainWindow *parent) :
+    QGraphicsView(parent),
+    m_parent(parent),
+    m_gestureZoomInertionBreak(0)
 {
+    //
+    // Настраиваем сцену
+    //
     m_scene = new QGraphicsScene(this);
     m_scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-    m_scene->setSceneRect(-400, -400, 800, 800);
+    m_scene->setSceneRect(-5000, -5000, 10000, 10000);
     setScene(m_scene);
 
+    //
+    // Отслеживаем жесты
+    //
+    grabGesture(Qt::PinchGesture);
+    grabGesture(Qt::SwipeGesture);
+
+    //
+    // Остальные настройки
+    //
     setCacheMode(CacheBackground);
     setViewportUpdateMode(BoundingRectViewportUpdate);
     setRenderHint(QPainter::Antialiasing);
@@ -50,46 +64,145 @@ GraphLogic *GraphWidget::graphLogic() const
 
 void GraphWidget::zoomIn()
 {
-    scaleView(qreal(0.2));
+    scaleView(qreal(0.1));
 }
 
 void GraphWidget::zoomOut()
 {
-    scaleView(qreal(-0.2));
+    scaleView(qreal(-0.1));
+}
+
+bool GraphWidget::event(QEvent *_event)
+{
+    bool result = true;
+
+    //
+    // Определяем особый обработчик для жестов
+    //
+    if (_event->type() == QEvent::Gesture) {
+        gestureEvent(static_cast<QGestureEvent*>(_event));
+    }
+    //
+    // Прочие стандартные обработчики событий
+    //
+    else {
+        result = QGraphicsView::event(_event);
+    }
+
+    return result;
+}
+
+void GraphWidget::gestureEvent(QGestureEvent *_event)
+{
+    //
+    // Жест масштабирования
+    //
+    if (QGesture* gesture = _event->gesture(Qt::PinchGesture)) {
+        if (QPinchGesture* pinch = qobject_cast<QPinchGesture *>(gesture)) {
+            //
+            // При масштабировании за счёт жестов приходится немного притормаживать
+            // т.к. события приходят слишком часто и при обработке каждого события
+            // пользователю просто невозможно корректно настроить масштаб
+            //
+
+            const int INERTION_BREAK_STOP = 4;
+            qreal zoomDelta = 0;
+            if (pinch->scaleFactor() > 1) {
+                if (m_gestureZoomInertionBreak < 0) {
+                    m_gestureZoomInertionBreak = 0;
+                } else if (m_gestureZoomInertionBreak >= INERTION_BREAK_STOP) {
+                    m_gestureZoomInertionBreak = 0;
+                    zoomDelta = 0.1;
+                } else {
+                    ++m_gestureZoomInertionBreak;
+                }
+            } else if (pinch->scaleFactor() < 1) {
+                if (m_gestureZoomInertionBreak > 0) {
+                    m_gestureZoomInertionBreak = 0;
+                } else if (m_gestureZoomInertionBreak <= -INERTION_BREAK_STOP) {
+                    m_gestureZoomInertionBreak = 0;
+                    zoomDelta = -0.1;
+                } else {
+                    --m_gestureZoomInertionBreak;
+                }
+            } else {
+                //
+                // При обычной прокрутке часто приходит событие с scaledFactor == 1,
+                // так что просто игнорируем их
+                //
+            }
+
+            //
+            // Если необходимо масштабируем и перерисовываем представление
+            //
+            const bool needZoomIn = pinch->scaleFactor() > pinch->lastScaleFactor();
+            const bool needZoomOut = pinch->scaleFactor() < pinch->lastScaleFactor();
+            if (zoomDelta > 0 && needZoomIn) {
+                zoomIn();
+            } else if (zoomDelta < 0 && needZoomOut) {
+                zoomOut();
+            }
+
+            _event->accept();
+        }
+    }
 }
 
 // MainWindow::keyPressEvent passes all keyevent to here, except
 // Ctrl + m (show/hide mainToolBar) and Ctrl + i (show/hide statusIconsToolbar)
-void GraphWidget::keyPressEvent(QKeyEvent *event)
+void GraphWidget::keyPressEvent(QKeyEvent *_event)
 {
     // if GraphLogic handles the event then stop.
-    if (m_graphlogic->processKeyEvent(event))
+    if (m_graphlogic->processKeyEvent(_event))
         return;
 
-    if (event->key() == Qt::Key_Plus)
+    if (_event->key() == Qt::Key_Plus)
     {
         zoomIn();
         return;
     }
 
-    if (event->key() == Qt::Key_Minus)
+    if (_event->key() == Qt::Key_Minus)
     {
         zoomOut();
         return;
     }
 
-    QGraphicsView::keyPressEvent(event);
+    QGraphicsView::keyPressEvent(_event);
 }
 
-void GraphWidget::wheelEvent(QWheelEvent *event)
+void GraphWidget::wheelEvent(QWheelEvent* _event)
 {
-    event->modifiers() & Qt::ControlModifier ?
-                (event->delta() > 0 ?
-                        m_graphlogic->scaleUp() :
-                        m_graphlogic->scaleDown()) :
-                (event->delta() > 0 ?
-                        zoomIn() :
-                        zoomOut());
+#ifdef Q_OS_MAC
+    const qreal ANGLE_DIVIDER = 2.;
+#else
+    const qreal ANGLE_DIVIDER = 120.;
+#endif
+    //
+    // Собственно масштабирование
+    //
+    if (_event->modifiers() & Qt::ControlModifier) {
+        if (_event->orientation() == Qt::Vertical) {
+            //
+            // zoomRange > 0 - масштаб увеличивается
+            // zoomRange < 0 - масштаб уменьшается
+            //
+            const qreal zoom = _event->angleDelta().y() / ANGLE_DIVIDER;
+            if (zoom > 0) {
+                zoomIn();
+            } else if (zoom < 0) {
+                zoomOut();
+            }
+
+            _event->accept();
+        }
+    }
+    //
+    // В противном случае прокручиваем редактор
+    //
+    else {
+        QGraphicsView::wheelEvent(_event);
+    }
 }
 
 void GraphWidget::drawBackground(QPainter *painter, const QRectF &rect)
@@ -103,13 +216,5 @@ void GraphWidget::drawBackground(QPainter *painter, const QRectF &rect)
 
 void GraphWidget::scaleView(qreal factor)
 {
-    // don't allow to scale up/down too much
-    qreal viewScale = transform().m11() + 1 + factor;
-    if (viewScale < qreal(1) || viewScale > qreal(10))
-    {
-        emit notification(tr("Too much zooming."));
-        return;
-    }
-
     scale(1 + factor, 1 + factor);
 }
