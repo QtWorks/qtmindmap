@@ -13,8 +13,6 @@ SOURCES += src/main.cpp \
            src/graphlogic.cpp \
            src/node.cpp \
            src/edge.cpp \
-           src/systemtray.cpp \
-           src/argumentparser.cpp \
            src/commands.cpp
 
 
@@ -23,8 +21,6 @@ HEADERS  += include/mainwindow.h \
             include/graphlogic.h \
             include/node.h \
             include/edge.h \
-            include/systemtray.h \
-            include/argumentparser.h \
             include/commands.h
 
 
