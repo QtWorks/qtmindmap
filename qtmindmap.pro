@@ -1,4 +1,3 @@
-
 QT       += core gui svg xml widgets
 
 CONFIG   += warn_on
@@ -34,15 +33,9 @@ FORMS        += ui/mainwindow.ui
 RESOURCES    += images/qtmindmap.qrc
 
 
-# the translation hack
-include(lang/locale.pri)
-
 INSTALLS += target translations desktop icon
 
 target.path = /usr/bin
-
-translations.files += .qm/i18n
-translations.path += /usr/share/qtmindmap
 
 desktop.files += other/qtmindmap.desktop
 desktop.path += /usr/share/applications

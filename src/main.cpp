@@ -16,21 +16,6 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-    // translation
-    QString locale = QLocale::system().name();
-    QTranslator translator;
-    if (locale != "C" && !translator.load(
-                QString("/usr/share/qtmindmap/i18n/qtmindmap_") + locale))
-    {
-        std::cerr << "No translation file for locale: "
-                  << locale.toStdString()
-                  << std::endl;
-    }
-    else
-    {
-        a.installTranslator(&translator);
-    }
-
     // parse args
     ArgumentParser argParser;
     if (!argParser.parseCmdLineArgs())
