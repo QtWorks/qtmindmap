@@ -1,11 +1,5 @@
 
-#version check qt: some functions introduced in 4.6
-contains(QT_VERSION, ^4\\.[0-5]\\..*) {
-message("Cannot build Qt Creator with Qt version $${QT_VERSION}.")
-error("Use at least Qt 4.6.")
-}
-
-QT       += core gui svg xml
+QT       += core gui svg xml widgets
 
 CONFIG   += warn_on
 

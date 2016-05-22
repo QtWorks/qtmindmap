@@ -1,6 +1,7 @@
 #include <stdlib.h> // EXIT_FAILURE
 #include <iostream> // cerr
 
+#include <QtWidgets>
 #include <QtGui>
 #include <QRegExp>
 #include <QTranslator>
