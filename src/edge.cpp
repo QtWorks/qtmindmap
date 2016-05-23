@@ -132,8 +132,8 @@ void Edge::paint(QPainter *painter,
                          m_secondary ?
                              Qt::DashLine :
                              Qt::SolidLine,
-                         Qt::RoundCap,
-                         Qt::RoundJoin));
+                         Qt::FlatCap,
+                         Qt::MiterJoin));
     painter->drawLine(line);
 
     if (line.length() < m_arrowSize)
@@ -143,8 +143,8 @@ void Edge::paint(QPainter *painter,
     painter->setPen(QPen(m_color,
                          m_width,
                          Qt::SolidLine,
-                         Qt::RoundCap,
-                         Qt::RoundJoin));
+                         Qt::SquareCap,
+                         Qt::MiterJoin));
 
     painter->setBrush(m_color);
     qreal arrowSize = m_arrowSize + m_width;

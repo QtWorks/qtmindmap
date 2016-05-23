@@ -277,19 +277,19 @@ QPointF Node::intersection(const QLineF &line, const bool &reverse) const
 
 
     QPainterPath path;
-    path.addRoundedRect(sceneBoundingRect(), 28.0, 28.0);
-
+    path.addRoundedRect(sceneBoundingRect(), 6.0, 6.0);
+    const qreal stepSize = 1 / line.length();
     if (reverse)
     {
-        for (qreal t = 1; t!=0; t-=0.01)
+        for (qreal t = 1.0; t >= 0; t -= stepSize)
             if (!path.contains(line.pointAt(t)))
-                return line.pointAt(t);
+                return line.pointAt(t - stepSize);
     }
     else
     {
-        for (qreal t = 0; t!=1; t+=0.01)
+        for (qreal t = 0.0; t <= 1; t += stepSize)
             if (!path.contains(line.pointAt(t)))
-                return line.pointAt(t);
+                return line.pointAt(t + stepSize);
     }
 
     return QPointF(0,0);
