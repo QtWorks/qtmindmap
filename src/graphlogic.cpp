@@ -151,9 +151,23 @@ bool GraphLogic::readContentFromXmlFile(const QString &fileName)
 
     QDomElement docElem = doc.documentElement();
 
+    //
+    // Восстанавливаем масштаб
+    //
+    m_graphWidget->resetTransform();
+    const qreal scaleFactor = docElem.attribute("scale").toDouble();
+    m_graphWidget->scale(scaleFactor, scaleFactor);
+    //
+    // ... и позиционирование
+    //
+    const int scrollX = docElem.attribute("scroll_x").toInt();
+    m_graphWidget->horizontalScrollBar()->setValue(scrollX);
+    const int scrollY = docElem.attribute("scroll_y").toInt();
+    m_graphWidget->verticalScrollBar()->setValue(scrollY);
+
     // add nodes
     QDomNodeList nodes = docElem.childNodes().item(0).childNodes();
-    for (unsigned int i = 0; i < nodes.length(); i++)
+    for (int i = 0; i < nodes.length(); i++)
     {
         QDomElement e = nodes.item(i).toElement();
         if(!e.isNull())
@@ -177,7 +191,7 @@ bool GraphLogic::readContentFromXmlFile(const QString &fileName)
 
     // add edges
     QDomNodeList edges = docElem.childNodes().item(1).childNodes();
-    for (unsigned int i = 0; i < edges.length(); i++)
+    for (int i = 0; i < edges.length(); i++)
     {
         QDomElement e = edges.item(i).toElement();
         if(!e.isNull())
@@ -214,6 +228,9 @@ void GraphLogic::writeContentToXmlFile(const QString &fileName)
     QDomDocument doc("QtMindMap");
 
     QDomElement root = doc.createElement("qtmindmap");
+    root.setAttribute("scale", QString::number(m_graphWidget->transform().m11()));
+    root.setAttribute("scroll_x", QString::number(m_graphWidget->horizontalScrollBar()->value()));
+    root.setAttribute("scroll_y", QString::number(m_graphWidget->verticalScrollBar()->value()));
     doc.appendChild( root );
 
     // nodes
@@ -429,7 +446,7 @@ void GraphLogic::scaleUp()
     context.m_graphLogic = this;
     context.m_nodeList = &m_nodeList;
     context.m_activeNode = m_activeNode;
-    context.m_scale = qreal(0.2);
+    context.m_scale = m_activeNode->scale() + qreal(0.1);
     context.m_subtree = subtree;
 
     QUndoCommand *scaleNodeCommand = new ScaleNodeCommand(context);
@@ -457,7 +474,7 @@ void GraphLogic::scaleDown()
     context.m_graphLogic = this;
     context.m_nodeList = &m_nodeList;
     context.m_activeNode = m_activeNode;
-    context.m_scale = qreal(-0.2);
+    context.m_scale = m_activeNode->scale() + qreal(-0.1);
     context.m_subtree = subtree;
 
     QUndoCommand *scaleNodeCommand = new ScaleNodeCommand(context);

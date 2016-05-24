@@ -222,18 +222,17 @@ QColor Node::textColor() const
 void Node::setScale(const qreal &factor,const QRectF &sceneRect)
 {
     // cannot scale out the Node from the scene
-    if (!sceneRect.contains(pos() +
-                            boundingRect().bottomRight() * scale() * factor))
+    if (!sceneRect.contains(pos() + boundingRect().bottomRight() * scale() * factor))
         return;
 
     prepareGeometryChange();
-    QGraphicsTextItem::setScale(factor + scale());
+    QGraphicsTextItem::setScale(factor);
 
     // scale edges to this Node too
     foreach(EdgeElement element, m_edgeList)
     {
         if (!element.startsFromThisNode)
-            element.edge->setWidth(element.edge->width() + factor );
+            element.edge->setWidth(factor * 4);
 
         element.edge->adjust();
     }
