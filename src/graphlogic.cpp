@@ -722,12 +722,12 @@ void GraphLogic::selectNode(Node *node)
     showingAllNodeNumbers(false);
     m_showingNodeNumbers = false;
 
-    if (m_edgeAdding)
+    if (m_edgeAdding && m_activeNode != 0)
     {
         addEdge(m_activeNode, node);
         m_edgeAdding = false;
     }
-    else if (m_edgeDeleting)
+    else if (m_edgeDeleting && m_activeNode != 0)
     {
         removeEdge(m_activeNode, node);
         m_edgeDeleting = false;
