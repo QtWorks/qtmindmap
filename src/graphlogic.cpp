@@ -78,14 +78,14 @@ bool GraphLogic::processKeyEvent(QKeyEvent *event)
         return true;
     }
 
-    if (event->key() == Qt::Key_Plus &&
-        event->modifiers() & Qt::ControlModifier)
+    if ((event->key() == Qt::Key_Plus || event->key() == Qt::Key_Equal) &&
+        event->modifiers() ^ Qt::ControlModifier)
     {
         scaleUp();
         return true;
     }
     if (event->key() == Qt::Key_Minus &&
-        event->modifiers() & Qt::ControlModifier)
+        event->modifiers() ^ Qt::ControlModifier)
     {
         scaleDown();
         return true;

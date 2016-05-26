@@ -155,13 +155,15 @@ void GraphWidget::keyPressEvent(QKeyEvent *_event)
     if (m_graphlogic->processKeyEvent(_event))
         return;
 
-    if (_event->key() == Qt::Key_Plus)
+    if ((_event->key() == Qt::Key_Plus || _event->key() == Qt::Key_Equal) &&
+        _event->modifiers() & Qt::ControlModifier)
     {
         zoomIn();
         return;
     }
 
-    if (_event->key() == Qt::Key_Minus)
+    if (_event->key() == Qt::Key_Minus &&
+        _event->modifiers() & Qt::ControlModifier)
     {
         zoomOut();
         return;
